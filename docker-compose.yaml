@@ -5,7 +5,7 @@ volumes:
 
 services:
   pg:
-    image: postgres:16-alpine3.19
+    image: postgres:14-alpine3.17
     environment:
       - "POSTGRES_DB=${PG_DATABASE_NAME}"
       - "POSTGRES_USER=${PG_USER}"
@@ -14,6 +14,7 @@ services:
       - "${PG_PORT}:5432"
     volumes:
       - postgres_volume:/var/lib/postgresql/data
+
   migrator:
     build:
       context: .
