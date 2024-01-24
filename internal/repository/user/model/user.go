@@ -14,12 +14,12 @@ const (
 
 type User struct {
 	ID        int64        `db:"id"`
-	Info      *Info        `db:""`
+	Info      *UserInfo    `db:""`
 	Password  string       `db:"password"`
 	CreatedAt time.Time    `db:"created_at"`
 	UpdatedAt sql.NullTime `db:"updated_at"`
 }
-type Info struct {
+type UserInfo struct {
 	Name  string `db:"name"`
 	Email string `db:"email"`
 	Role  Role   `db:"role"`

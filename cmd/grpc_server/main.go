@@ -5,8 +5,10 @@ import (
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/joho/godotenv"
 	"github.com/passsquale/auth/internal/config"
-	"github.com/passsquale/auth/internal/repository"
+	"github.com/passsquale/auth/internal/converter"
 	"github.com/passsquale/auth/internal/repository/user"
+	"github.com/passsquale/auth/internal/service"
+	userSrv "github.com/passsquale/auth/internal/service/user"
 	desc "github.com/passsquale/auth/pkg/user_v1"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
@@ -16,11 +18,11 @@ import (
 
 type server struct {
 	desc.UnimplementedUserV1Server
-	userRepository repository.UserRepository
+	userService service.UserService
 }
 
 func (s *server) Create(ctx context.Context, req *desc.CreateRequest) (*desc.CreateResponse, error) {
-	id, err := s.userRepository.Create(ctx, req)
+	id, err := s.userService.Create(ctx, converter.ToUserInfoFromDesc(req))
 	if err != nil {
 		return nil, err
 	}
@@ -31,16 +33,16 @@ func (s *server) Create(ctx context.Context, req *desc.CreateRequest) (*desc.Cre
 }
 
 func (s *server) Get(ctx context.Context, req *desc.GetRequest) (*desc.GetResponse, error) {
-	userObj, err := s.userRepository.Get(ctx, req.GetId())
+	userObj, err := s.userService.Get(ctx, req.GetId())
 	if err != nil {
 		return nil, err
 	}
-
+	converteredUser := converter.ToUserFromService(userObj)
 	return &desc.GetResponse{
-		Id:        userObj.Id,
-		Info:      userObj.Info,
-		CreatedAt: userObj.CreatedAt,
-		UpdatedAt: userObj.UpdatedAt,
+		Id:        converteredUser.Id,
+		Info:      converteredUser.Info,
+		CreatedAt: converteredUser.CreatedAt,
+		UpdatedAt: converteredUser.UpdatedAt,
 	}, nil
 }
 func main() {
@@ -50,11 +52,6 @@ func main() {
 	if err != nil {
 		log.Fatalf("cannot load godotenv: %v", err)
 	}
-
-	/*err = config.Load(".env")
-	if err != nil {
-		log.Fatalf("failed to load config: %v", err)
-	}*/
 
 	grpcConfig, err := config.NewGRPCConfig()
 	if err != nil {
@@ -76,11 +73,11 @@ func main() {
 	defer pool.Close()
 
 	userRepo := user.NewRepository(pool)
-
+	userSrv := userSrv.NewService(userRepo)
 	s := grpc.NewServer()
 	reflection.Register(s)
 
-	desc.RegisterUserV1Server(s, &server{userRepository: userRepo})
+	desc.RegisterUserV1Server(s, &server{userService: userSrv})
 	log.Printf("server listening at %v", lis.Addr())
 
 	if err = s.Serve(lis); err != nil {

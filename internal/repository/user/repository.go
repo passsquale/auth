@@ -4,10 +4,10 @@ import (
 	"context"
 	sq "github.com/Masterminds/squirrel"
 	"github.com/jackc/pgx/v4/pgxpool"
+	"github.com/passsquale/auth/internal/model"
 	"github.com/passsquale/auth/internal/repository"
 	"github.com/passsquale/auth/internal/repository/user/converter"
-	"github.com/passsquale/auth/internal/repository/user/model"
-	desc "github.com/passsquale/auth/pkg/user_v1"
+	modelRepo "github.com/passsquale/auth/internal/repository/user/model"
 )
 
 const (
@@ -30,10 +30,10 @@ func NewRepository(db *pgxpool.Pool) repository.UserRepository {
 	return &repo{db: db}
 }
 
-func (r *repo) Create(ctx context.Context, info *desc.CreateRequest) (int64, error) {
+func (r *repo) Create(ctx context.Context, info *model.UserInfo) (int64, error) {
 	builder := sq.Insert(tableName).
-		Columns(nameColumn, emailColumn, roleColumn, passwordColumn).
-		Values(info.Info.Name, info.Info.Email, info.Password, info.Info.Role).
+		Columns(nameColumn, emailColumn, roleColumn).
+		Values(info.Name, info.Email, info.Role).
 		Suffix("RETURNING id")
 	query, args, err := builder.ToSql()
 	if err != nil {
@@ -46,7 +46,7 @@ func (r *repo) Create(ctx context.Context, info *desc.CreateRequest) (int64, err
 	}
 	return id, nil
 }
-func (r *repo) Get(ctx context.Context, id int64) (*desc.GetResponse, error) {
+func (r *repo) Get(ctx context.Context, id int64) (*model.User, error) {
 	builder := sq.Select(idColumn, nameColumn, emailColumn,
 		roleColumn, passwordColumn, createdAtColumn, updatedAtColumn).
 		From(tableName).
@@ -56,7 +56,7 @@ func (r *repo) Get(ctx context.Context, id int64) (*desc.GetResponse, error) {
 	if err != nil {
 		return nil, err
 	}
-	var user model.User
+	var user modelRepo.User
 	err = r.db.QueryRow(ctx, query, args...).Scan(&user.ID, &user.Info.Name, &user.Info.Email,
 		&user.Info.Role, &user.Password, &user.CreatedAt, &user.UpdatedAt)
 	if err != nil {
