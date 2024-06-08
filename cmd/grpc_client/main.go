@@ -31,6 +31,6 @@ func main() {
 		log.Fatalf("failed to get user by id: %v", err)
 	}
 
-	log.Printf("User info: \n", "%+v", resp.GetUser())
+	log.Printf("User info: \n  %+v", resp.GetUser())
 
 }
