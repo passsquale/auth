@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"flag"
-	"fmt"
 	"github.com/brianvoe/gofakeit"
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -78,7 +77,7 @@ func main() {
 		log.Fatalf("failed to get pg config: %v", err)
 	}
 
-	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", grpcConfig.Address()))
+	lis, err := net.Listen("tcp", grpcConfig.Address())
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
