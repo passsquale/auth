@@ -29,5 +29,5 @@ func NewPGConfig() (PGConfig, error) {
 }
 
 func (cfg *pgConfig) DSN() string {
-	return cfg.DSN()
+	return cfg.dsn
 }

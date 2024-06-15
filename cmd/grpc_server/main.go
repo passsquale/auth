@@ -3,6 +3,8 @@ package main
 import (
 	"context"
 	"flag"
+	"fmt"
+	"github.com/Masterminds/squirrel"
 	"github.com/brianvoe/gofakeit"
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -13,6 +15,17 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 	"log"
 	"net"
+)
+
+const (
+	usersTable      = "users"
+	IDColumn        = "id"
+	NameColumn      = "name"
+	EmailColumn     = "email"
+	RoleColumn      = "role"
+	PasswordColumn  = "password"
+	CreatedAtColumn = "created_at"
+	UpdatedAtColumn = "updated_at"
 )
 
 var configPath string
@@ -27,7 +40,6 @@ type server struct {
 }
 
 func (s *server) Get(ctx context.Context, req *desc.GetRequest) (*desc.GetResponse, error) {
-	log.Printf("Note id: %d", req.GetId())
 	return &desc.GetResponse{
 		User: &desc.User{
 			Id: req.GetId(),
@@ -43,18 +55,32 @@ func (s *server) Get(ctx context.Context, req *desc.GetRequest) (*desc.GetRespon
 }
 
 func (s *server) Create(ctx context.Context, req *desc.CreateRequest) (*desc.CreateResponse, error) {
-	log.Printf("Create user: %+v", req.Info)
+	buildInsert := squirrel.Insert(usersTable).
+		PlaceholderFormat(squirrel.Dollar).
+		Columns(NameColumn, EmailColumn, RoleColumn, PasswordColumn).
+		Values(req.GetInfo().GetName(), req.GetInfo().GetEmail(), req.GetInfo().GetRole(), req.GetInfo().GetPassword()).
+		Suffix(fmt.Sprintf("RETURNING %s", IDColumn))
+	query, args, err := buildInsert.ToSql()
+	if err != nil {
+		return nil, err
+	}
+	var ID int64
+	err = s.pool.QueryRow(ctx, query, args...).Scan(&ID)
+	if err != nil {
+		return nil, err
+	}
+
 	return &desc.CreateResponse{
-		Id: gofakeit.Int64(),
+		Id: ID,
 	}, nil
 }
 
 func (s *server) Update(ctx context.Context, req *desc.UpdateRequest) (*empty.Empty, error) {
-	log.Printf("Update user id: %d  name: %+v", req.Id, req.Name)
+	log.Printf("Update user id: %d  name: %+v", req.GetWrap().GetId(), req.GetWrap().GetName())
 	return &empty.Empty{}, nil
 }
 func (s *server) Delete(ctx context.Context, req *desc.DeleteRequest) (*empty.Empty, error) {
-	log.Printf("Delete user id: %d", req.Id)
+	log.Printf("Delete user id: %d", req.GetId())
 	return &empty.Empty{}, nil
 }
 

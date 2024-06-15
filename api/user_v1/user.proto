@@ -8,56 +8,62 @@ import "google/protobuf/wrappers.proto";
 
 option go_package = "github.com/passsquale/auth/pkg/user_v1;user_v1";
 
-service UserV1{
+service UserV1 {
   rpc Create(CreateRequest) returns (CreateResponse);
   rpc Get(GetRequest) returns (GetResponse);
-  rpc Update(UpdateRequest) returns(google.protobuf.Empty);
+  rpc Update(UpdateRequest) returns (google.protobuf.Empty);
   rpc Delete(DeleteRequest) returns (google.protobuf.Empty);
 }
 
-enum Role{
-  USER = 0;
-  ADMIN = 1;
+enum Role {
+  UNKNOWN = 0;
+  USER = 1;
+  ADMIN = 2;
 }
 
-message UserInfo{
+message UserInfo {
   string name = 1;
   string email = 2;
-  Role role = 3;
+  string password = 3;
+  string password_confirm = 4;
+  Role role = 5;
 }
 
-message User{
+message User {
   int64 id = 1;
   UserInfo info = 2;
-  google.protobuf.Timestamp created_at = 5;
-  google.protobuf.Timestamp updated_at = 6;
+  google.protobuf.Timestamp created_at = 3;
+  google.protobuf.Timestamp updated_at = 4;
 }
 
-message CreateRequest{
+message CreateRequest {
   UserInfo info = 1;
-  string password = 2;
-  string password_confirm = 3;
 }
 
-message CreateResponse{
+message CreateResponse {
   int64 id = 1;
 }
 
-message GetRequest{
+message GetRequest {
   int64 id = 1;
 }
 
-message GetResponse{
+message GetResponse {
   User user = 1;
 }
 
-message UpdateRequest{
+message Updwrap {
   int64 id = 1;
   google.protobuf.StringValue name = 2;
   google.protobuf.StringValue email = 3;
+  Role role = 4;
 }
 
-message DeleteRequest{
+message UpdateRequest {
+  Updwrap wrap = 1;
+}
+
+message DeleteRequest {
   int64 id = 1;
 }
 
