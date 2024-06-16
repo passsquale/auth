@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/Masterminds/squirrel"
-	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/passsquale/auth/internal/client/db"
 	"github.com/passsquale/auth/internal/model"
 	"github.com/passsquale/auth/internal/repository"
 	"github.com/passsquale/auth/internal/repository/user/converter"
@@ -25,10 +25,10 @@ const (
 )
 
 type repo struct {
-	db *pgxpool.Pool
+	db db.Client
 }
 
-func NewUserRepository(db *pgxpool.Pool) repository.UserRepository {
+func NewUserRepository(db db.Client) repository.UserRepository {
 	return &repo{db: db}
 }
 
@@ -42,8 +42,12 @@ func (r *repo) Create(ctx context.Context, userCreate *model.UserCreate) (int64,
 	if err != nil {
 		return 0, err
 	}
+	q := db.Query{
+		Name:     "user_repository.Create",
+		QueryRaw: query,
+	}
 	var id int64
-	err = r.db.QueryRow(ctx, query, args...).Scan(&id)
+	err = r.db.DB().QueryRowContext(ctx, q, args...).Scan(&id)
 	if err != nil {
 		return 0, err
 	}
@@ -56,15 +60,19 @@ func (r *repo) Get(ctx context.Context, id int64) (*model.User, error) {
 		passwordColumn, createdAtColumn, updatedAtColumn).
 		PlaceholderFormat(squirrel.Dollar).
 		From(usersTable).
-		Where(squirrel.Eq{idColumn: id})
+		Where(squirrel.Eq{idColumn: id}).
+		Limit(1)
 
 	query, args, err := builder.ToSql()
 	if err != nil {
 		return nil, err
 	}
+	q := db.Query{
+		Name:     "user_repository.Get",
+		QueryRaw: query,
+	}
 	var user modelRepo.User
-	err = r.db.QueryRow(ctx, query, args...).Scan(&user.ID, &user.UserInfo.Name, &user.UserInfo.Email,
-		&user.UserInfo.Role, &user.Password, &user.CreatedAt, &user.UpdatedAt)
+	err = r.db.DB().ScanOneContext(ctx, &user, q, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -83,7 +91,11 @@ func (r *repo) Update(ctx context.Context, userUpdate *model.UserUpdate) error {
 	if err != nil {
 		return err
 	}
-	_, err = r.db.Exec(ctx, query, args...)
+	q := db.Query{
+		Name:     "user_repository.Update",
+		QueryRaw: query,
+	}
+	_, err = r.db.DB().ExecContext(ctx, q, args...)
 	if err != nil {
 		return err
 	}
@@ -99,7 +111,11 @@ func (r *repo) Delete(ctx context.Context, id int64) error {
 	if err != nil {
 		return err
 	}
-	_, err = r.db.Exec(ctx, query, args...)
+	q := db.Query{
+		Name:     "user_repository.Delete",
+		QueryRaw: query,
+	}
+	_, err = r.db.DB().ExecContext(ctx, q, args...)
 	if err != nil {
 		return err
 	}

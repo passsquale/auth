@@ -2,8 +2,10 @@ package app
 
 import (
 	"context"
-	"github.com/jackc/pgx/v5/pgxpool"
 	userApi "github.com/passsquale/auth/internal/api/user"
+	"github.com/passsquale/auth/internal/client/db"
+	"github.com/passsquale/auth/internal/client/db/pg"
+	"github.com/passsquale/auth/internal/client/db/transaction"
 	"github.com/passsquale/auth/internal/closer"
 	"github.com/passsquale/auth/internal/config"
 	"github.com/passsquale/auth/internal/repository"
@@ -17,7 +19,8 @@ type serviceProvider struct {
 	pgConfig   config.PGConfig
 	grpcConfig config.GRPCConfig
 
-	pgPool *pgxpool.Pool
+	dbClient  db.Client
+	txManager db.TxManager
 
 	userRepository repository.UserRepository
 
@@ -52,36 +55,42 @@ func (s *serviceProvider) GRPCConfig() config.GRPCConfig {
 	return s.grpcConfig
 }
 
-func (s *serviceProvider) PgPool(ctx context.Context) *pgxpool.Pool {
-	if s.pgPool == nil {
-		pool, err := pgxpool.New(ctx, s.PGConfig().DSN())
+func (s *serviceProvider) DBClient(ctx context.Context) db.Client {
+	if s.dbClient == nil {
+		cl, err := pg.New(ctx, s.PGConfig().DSN())
 		if err != nil {
-			log.Fatalf("failed to connect to database: %v", err)
+			log.Fatalf("failed to create db client: %v", err)
 		}
 
-		err = pool.Ping(ctx)
+		err = cl.DB().Ping(ctx)
 		if err != nil {
 			log.Fatalf("ping error: %v", err)
 		}
-		closer.Add(func() error {
-			pool.Close()
-			return nil
-		})
-		s.pgPool = pool
+		closer.Add(cl.Close)
+		s.dbClient = cl
 	}
-	return s.pgPool
+	return s.dbClient
+}
+
+func (s *serviceProvider) TxManager(ctx context.Context) db.TxManager {
+	if s.txManager == nil {
+		s.txManager = transaction.NewTransactionManager(s.DBClient(ctx).DB())
+	}
+
+	return s.txManager
 }
 
 func (s *serviceProvider) UserRepository(ctx context.Context) repository.UserRepository {
 	if s.userRepository == nil {
-		s.userRepository = userRepository.NewUserRepository(s.PgPool(ctx))
+		s.userRepository = userRepository.NewUserRepository(s.DBClient(ctx))
 	}
 	return s.userRepository
 }
 
 func (s *serviceProvider) UserService(ctx context.Context) service.UserService {
 	if s.userService == nil {
-		s.userService = userService.NewUserService(s.UserRepository(ctx))
+		s.userService = userService.NewUserService(
+			s.UserRepository(ctx), s.TxManager(ctx))
 	}
 	return s.userService
 }

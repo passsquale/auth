@@ -24,7 +24,7 @@ type User struct {
 }
 
 type UserInfo struct {
-	Name  string `db:"username"`
+	Name  string `db:"name"`
 	Email string `db:"email"`
 	Role  int32  `db:"role"`
 }
