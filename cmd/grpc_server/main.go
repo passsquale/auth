@@ -15,17 +15,6 @@ import (
 	"net"
 )
 
-const (
-	usersTable      = "users"
-	IDColumn        = "id"
-	NameColumn      = "name"
-	EmailColumn     = "email"
-	RoleColumn      = "role"
-	PasswordColumn  = "password"
-	CreatedAtColumn = "created_at"
-	UpdatedAtColumn = "updated_at"
-)
-
 var configPath string
 
 func init() {
