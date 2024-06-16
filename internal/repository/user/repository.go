@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"github.com/Masterminds/squirrel"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/passsquale/auth/internal/model"
 	"github.com/passsquale/auth/internal/repository"
 	"github.com/passsquale/auth/internal/repository/user/converter"
-	"github.com/passsquale/auth/internal/repository/user/model"
-	desc "github.com/passsquale/auth/pkg/user_v1"
+	modelRepo "github.com/passsquale/auth/internal/repository/user/model"
 )
 
 const (
@@ -31,11 +31,11 @@ func NewRepository(db *pgxpool.Pool) repository.UserRepository {
 	return &repo{db: db}
 }
 
-func (r *repo) Create(ctx context.Context, cr *desc.CreateRequest) (int64, error) {
+func (r *repo) Create(ctx context.Context, userCreate *model.UserCreate) (int64, error) {
 	builder := squirrel.Insert(usersTable).
 		PlaceholderFormat(squirrel.Dollar).
 		Columns(nameColumn, emailColumn, roleColumn, passwordColumn).
-		Values(cr.Info.Name, cr.Info.Email, cr.Info.Role, cr.Password).
+		Values(userCreate.UserInfo.Name, userCreate.UserInfo.Email, userCreate.UserInfo.Role, userCreate.Password).
 		Suffix(fmt.Sprintf("RETURNING %s", idColumn))
 	query, args, err := builder.ToSql()
 	if err != nil {
@@ -50,7 +50,7 @@ func (r *repo) Create(ctx context.Context, cr *desc.CreateRequest) (int64, error
 	return id, nil
 }
 
-func (r *repo) Get(ctx context.Context, id int64) (*desc.User, error) {
+func (r *repo) Get(ctx context.Context, id int64) (*model.User, error) {
 	builder := squirrel.Select(idColumn, nameColumn, emailColumn, roleColumn,
 		passwordColumn, createdAtColumn, updatedAtColumn).
 		PlaceholderFormat(squirrel.Dollar).
@@ -61,7 +61,7 @@ func (r *repo) Get(ctx context.Context, id int64) (*desc.User, error) {
 	if err != nil {
 		return nil, err
 	}
-	var user model.User
+	var user modelRepo.User
 	err = r.db.QueryRow(ctx, query, args...).Scan(&user.ID, &user.UserInfo.Name, &user.UserInfo.Email,
 		&user.UserInfo.Role, &user.Password, &user.CreatedAt, &user.UpdatedAt)
 	if err != nil {
@@ -70,13 +70,13 @@ func (r *repo) Get(ctx context.Context, id int64) (*desc.User, error) {
 	return converter.ToUserFromRepo(user), nil
 }
 
-func (r *repo) Update(ctx context.Context, wrap *desc.Updwrap) error {
+func (r *repo) Update(ctx context.Context, userUpdate *model.UserUpdate) error {
 	builder := squirrel.Update(usersTable).
 		PlaceholderFormat(squirrel.Dollar).
-		Set(nameColumn, wrap.Name).
-		Set(emailColumn, wrap.Email).
-		Set(roleColumn, wrap.Role).
-		Where(squirrel.Eq{idColumn: wrap.Id})
+		Set(nameColumn, userUpdate.UserInfo.Name).
+		Set(emailColumn, userUpdate.UserInfo.Email).
+		Set(roleColumn, userUpdate.UserInfo.Role).
+		Where(squirrel.Eq{idColumn: userUpdate.ID})
 	query, args, err := builder.ToSql()
 	if err != nil {
 		return err

@@ -6,15 +6,13 @@ import (
 )
 
 type UserUpdate struct {
-	ID    int64  `db:"id"`
-	Name  string `db:"username"`
-	Email string `db:"email"`
-	Role  int    `db:"role"`
+	ID       int64    `db:"id"`
+	UserInfo UserInfo `db:""`
 }
 
 type UserCreate struct {
-	UserUpdate UserUpdate `db:""`
-	Password   string     `db:"password"`
+	UserInfo UserInfo `db:""`
+	Password string   `db:"password"`
 }
 
 type User struct {

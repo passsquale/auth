@@ -1,13 +1,13 @@
-package repository
+package service
 
 import (
 	"context"
 	"github.com/passsquale/auth/internal/model"
 )
 
-type UserRepository interface {
+type UserService interface {
 	Create(ctx context.Context, userCreate *model.UserCreate) (int64, error)
 	Get(ctx context.Context, id int64) (*model.User, error)
-	Update(ctx context.Context, wrap *model.UserUpdate) error
+	Update(ctx context.Context, userUpdate *model.UserUpdate) error
 	Delete(ctx context.Context, id int64) error
 }
