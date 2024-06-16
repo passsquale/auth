@@ -7,7 +7,7 @@ import (
 	desc "github.com/passsquale/auth/pkg/user_v1"
 )
 
-func (i *Implementation) Update(ctx context.Context, req *desc.UpdateRequest) (*empty.Empty, error) {
+func (i *UserImplementation) Update(ctx context.Context, req *desc.UpdateRequest) (*empty.Empty, error) {
 	err := i.userService.Update(ctx, converter.ToUserUpdateFromDesc(*req))
 	if err != nil {
 		return nil, err

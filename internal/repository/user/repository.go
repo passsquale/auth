@@ -9,6 +9,7 @@ import (
 	"github.com/passsquale/auth/internal/repository"
 	"github.com/passsquale/auth/internal/repository/user/converter"
 	modelRepo "github.com/passsquale/auth/internal/repository/user/model"
+	"time"
 )
 
 const (
@@ -27,7 +28,7 @@ type repo struct {
 	db *pgxpool.Pool
 }
 
-func NewRepository(db *pgxpool.Pool) repository.UserRepository {
+func NewUserRepository(db *pgxpool.Pool) repository.UserRepository {
 	return &repo{db: db}
 }
 
@@ -76,6 +77,7 @@ func (r *repo) Update(ctx context.Context, userUpdate *model.UserUpdate) error {
 		Set(nameColumn, userUpdate.UserInfo.Name).
 		Set(emailColumn, userUpdate.UserInfo.Email).
 		Set(roleColumn, userUpdate.UserInfo.Role).
+		Set(updatedAtColumn, time.Now()).
 		Where(squirrel.Eq{idColumn: userUpdate.ID})
 	query, args, err := builder.ToSql()
 	if err != nil {

@@ -5,13 +5,13 @@ import (
 	desc "github.com/passsquale/auth/pkg/user_v1"
 )
 
-type Implementation struct {
+type UserImplementation struct {
 	desc.UnimplementedUserV1Server
 	userService service.UserService
 }
 
-func NewImplementation(userService service.UserService) *Implementation {
-	return &Implementation{
+func NewUserImplementation(userService service.UserService) *UserImplementation {
+	return &UserImplementation{
 		userService: userService,
 	}
 }
