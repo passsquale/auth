@@ -10,5 +10,6 @@ FROM alpine:latest
 
 WORKDIR /root/
 COPY --from=builder /github.com/passsquale/auth/source/bin/auth .
+COPY --from=builder /github.com/passsquale/auth/source/*.env .
 
 CMD ["./auth"]
