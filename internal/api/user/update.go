@@ -8,7 +8,7 @@ import (
 )
 
 func (i *UserImplementation) Update(ctx context.Context, req *desc.UpdateRequest) (*empty.Empty, error) {
-	err := i.userService.Update(ctx, converter.ToUserUpdateFromDesc(*req))
+	err := i.userService.Update(ctx, converter.ToUserUpdateFromDesc(req))
 	if err != nil {
 		return nil, err
 	}

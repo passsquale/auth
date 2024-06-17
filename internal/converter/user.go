@@ -28,7 +28,7 @@ func ToUserInfoFromService(user model.UserInfo) *desc.UserInfo {
 	}
 }
 
-func ToUserUpdateFromDesc(updateRequest desc.UpdateRequest) *model.UserUpdate {
+func ToUserUpdateFromDesc(updateRequest *desc.UpdateRequest) *model.UserUpdate {
 	return &model.UserUpdate{
 		ID: updateRequest.Wrap.Id,
 		UserInfo: model.UserInfo{
@@ -39,7 +39,7 @@ func ToUserUpdateFromDesc(updateRequest desc.UpdateRequest) *model.UserUpdate {
 	}
 }
 
-func ToUserCreateFromDesc(createRequest desc.CreateRequest) *model.UserCreate {
+func ToUserCreateFromDesc(createRequest *desc.CreateRequest) *model.UserCreate {
 	return &model.UserCreate{
 		UserInfo: model.UserInfo{
 			Name:  createRequest.Info.Name,
