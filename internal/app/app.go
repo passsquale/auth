@@ -4,6 +4,7 @@ import (
 	"context"
 	"flag"
 	"github.com/passsquale/auth/internal/closer"
+	"github.com/passsquale/auth/internal/config"
 	desc "github.com/passsquale/auth/pkg/user_v1"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -59,6 +60,10 @@ func (a *App) initDeps(ctx context.Context) error {
 
 func (a *App) initConfig(_ context.Context) error {
 	flag.Parse()
+	err := config.Load(configPath)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
