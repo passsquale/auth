@@ -7,8 +7,21 @@ import "google/protobuf/timestamp.proto";
 import "google/protobuf/wrappers.proto";
 import "validate/validate.proto";
 import "google/api/annotations.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
 
 option go_package = "github.com/passsquale/auth/pkg/user_v1;user_v1";
+
+option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
+  info: {
+    title: "Auth API"
+    version: "1.0.0"
+  };
+  host: "localhost:8070",
+  schemes: HTTP,
+  schemes: HTTPS,
+  consumes: "application/json",
+  produces: "application/json",
+};
 
 service UserV1 {
   rpc Create(CreateRequest) returns (CreateResponse){
@@ -42,30 +55,30 @@ enum Role {
 }
 
 message UserInfo {
-  string name = 1;
-  string email = 2;
-  Role role = 4;
+  string name = 1 [(validate.rules).string = {min_len: 1, max_len: 50,}];
+  string email = 2 [(validate.rules).string.email = true];
+  Role role = 4 [(validate.rules).enum.defined_only = true];
 }
 
 message User {
-  int64 id = 1;
-  UserInfo info = 2;
-  string password = 3;
-  google.protobuf.Timestamp created_at = 4;
+  int64 id = 1 [(validate.rules).int64.gte = 0];
+  UserInfo info = 2 [(validate.rules).message.required = true];
+  string password = 3 [(validate.rules).string = {min_len: 5, max_len: 50}];
+  google.protobuf.Timestamp created_at = 4 [(validate.rules).timestamp.required = true];
   google.protobuf.Timestamp updated_at = 5;
 }
 
 message CreateRequest {
-  UserInfo info = 1;
-  string password = 2;
+  UserInfo info = 1 [(validate.rules).message.required = true];
+  string password = 2 [(validate.rules).string = {min_len: 5, max_len: 50}];
 }
 
 message CreateResponse {
-  int64 id = 1;
+  int64 id = 1 [(validate.rules).int64.gte = 0];
 }
 
 message GetRequest {
-  int64 id = 1;
+  int64 id = 1 [(validate.rules).int64.gte = 0];
 }
 
 message GetResponse {
@@ -73,17 +86,17 @@ message GetResponse {
 }
 
 message Updwrap {
-  int64 id = 1;
+  int64 id = 1 [(validate.rules).int64.gte = 0];
   google.protobuf.StringValue name = 2;
   google.protobuf.StringValue email = 3;
-  Role role = 4;
+  Role role = 4 [(validate.rules).enum.defined_only = true];
 }
 
 message UpdateRequest {
-  Updwrap wrap = 1;
+  Updwrap wrap = 1 [(validate.rules).message.required = true];
 }
 
 message DeleteRequest {
-  int64 id = 1;
+  int64 id = 1 [(validate.rules).int64.gte = 0];
 }
 
