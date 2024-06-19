@@ -36,7 +36,7 @@ func (r *repo) Create(ctx context.Context, userCreate *model.UserCreate) (int64,
 	builder := squirrel.Insert(usersTable).
 		PlaceholderFormat(squirrel.Dollar).
 		Columns(nameColumn, emailColumn, roleColumn, passwordColumn).
-		Values(userCreate.UserInfo.Name, userCreate.UserInfo.Email, userCreate.UserInfo.Role, userCreate.Password).
+		Values(userCreate.Info.Username, userCreate.Info.Email, userCreate.Info.Role, userCreate.Password).
 		Suffix(fmt.Sprintf("RETURNING %s", idColumn))
 	query, args, err := builder.ToSql()
 	if err != nil {
@@ -82,9 +82,9 @@ func (r *repo) Get(ctx context.Context, id int64) (*model.User, error) {
 func (r *repo) Update(ctx context.Context, userUpdate *model.UserUpdate) error {
 	builder := squirrel.Update(usersTable).
 		PlaceholderFormat(squirrel.Dollar).
-		Set(nameColumn, userUpdate.UserInfo.Name).
-		Set(emailColumn, userUpdate.UserInfo.Email).
-		Set(roleColumn, userUpdate.UserInfo.Role).
+		Set(nameColumn, userUpdate.Info.Username).
+		Set(emailColumn, userUpdate.Info.Email).
+		Set(roleColumn, userUpdate.Info.Role).
 		Set(updatedAtColumn, time.Now()).
 		Where(squirrel.Eq{idColumn: userUpdate.ID})
 	query, args, err := builder.ToSql()

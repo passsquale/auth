@@ -81,6 +81,36 @@
           "UserV1"
         ]
       },
+      "post": {
+        "operationId": "UserV1_Create",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/user_v1CreateResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/user_v1CreateRequest"
+            }
+          }
+        ],
+        "tags": [
+          "UserV1"
+        ]
+      },
       "patch": {
         "operationId": "UserV1_Update",
         "responses": {
@@ -105,38 +135,6 @@
             "required": true,
             "schema": {
               "$ref": "#/definitions/user_v1UpdateRequest"
-            }
-          }
-        ],
-        "tags": [
-          "UserV1"
-        ]
-      }
-    },
-    "/user/v1/create": {
-      "post": {
-        "operationId": "UserV1_Create",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/user_v1CreateResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/user_v1CreateRequest"
             }
           }
         ],
@@ -203,38 +201,29 @@
         }
       }
     },
-    "user_v1Role": {
-      "type": "string",
-      "enum": [
-        "UNKNOWN",
-        "USER",
-        "ADMIN"
-      ],
-      "default": "UNKNOWN"
-    },
-    "user_v1UpdateRequest": {
+    "user_v1UpdateInfo": {
       "type": "object",
       "properties": {
-        "wrap": {
-          "$ref": "#/definitions/user_v1Updwrap"
-        }
-      }
-    },
-    "user_v1Updwrap": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string",
-          "format": "int64"
-        },
-        "name": {
+        "username": {
           "type": "string"
         },
         "email": {
           "type": "string"
         },
         "role": {
-          "$ref": "#/definitions/user_v1Role"
+          "$ref": "#/definitions/user_v1UserRole"
+        }
+      }
+    },
+    "user_v1UpdateRequest": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "int64"
+        },
+        "info": {
+          "$ref": "#/definitions/user_v1UpdateInfo"
         }
       }
     },
@@ -247,9 +236,6 @@
         },
         "info": {
           "$ref": "#/definitions/user_v1UserInfo"
-        },
-        "password": {
-          "type": "string"
         },
         "createdAt": {
           "type": "string",
@@ -264,16 +250,25 @@
     "user_v1UserInfo": {
       "type": "object",
       "properties": {
-        "name": {
+        "username": {
           "type": "string"
         },
         "email": {
           "type": "string"
         },
         "role": {
-          "$ref": "#/definitions/user_v1Role"
+          "$ref": "#/definitions/user_v1UserRole"
         }
       }
+    },
+    "user_v1UserRole": {
+      "type": "string",
+      "enum": [
+        "UNKNOWN",
+        "USER",
+        "ADMIN"
+      ],
+      "default": "UNKNOWN"
     }
   }
 }

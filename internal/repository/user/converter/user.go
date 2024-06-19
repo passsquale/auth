@@ -8,17 +8,17 @@ import (
 func ToUserFromRepo(user modelRepo.User) *model.User {
 	return &model.User{
 		ID:        user.ID,
-		UserInfo:  *ToUserInfoFromRepo(user.UserInfo),
+		Info:      ToUserInfoFromRepo(user.Info),
 		Password:  user.Password,
 		CreatedAt: user.CreatedAt,
 		UpdatedAt: user.UpdatedAt,
 	}
 }
 
-func ToUserInfoFromRepo(user modelRepo.UserInfo) *model.UserInfo {
-	return &model.UserInfo{
-		Name:  user.Name,
-		Email: user.Email,
-		Role:  model.Role(user.Role),
+func ToUserInfoFromRepo(user modelRepo.UserInfo) model.UserInfo {
+	return model.UserInfo{
+		Username: user.Name,
+		Email:    user.Email,
+		Role:     model.UserRole(user.Role),
 	}
 }

@@ -24,79 +24,80 @@ option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
 };
 
 service UserV1 {
-  rpc Create(CreateRequest) returns (CreateResponse){
+  rpc Create(CreateRequest) returns (CreateResponse) {
     option (google.api.http) = {
-      post: "/user/v1/create"
+      post: "/user/v1"
       body: "*"
     };
   }
-  rpc Get(GetRequest) returns (GetResponse){
+
+  rpc Get(GetRequest) returns (GetResponse) {
     option (google.api.http) = {
       get: "/user/v1"
     };
   }
-  rpc Update(UpdateRequest) returns (google.protobuf.Empty){
+
+  rpc Update(UpdateRequest) returns (google.protobuf.Empty) {
     option (google.api.http) = {
       patch: "/user/v1"
       body: "*"
     };
   }
-  rpc Delete(DeleteRequest) returns (google.protobuf.Empty){
+
+  rpc Delete(DeleteRequest) returns (google.protobuf.Empty) {
     option (google.api.http) = {
       delete: "/user/v1"
     };
   }
 }
 
-enum Role {
+enum UserRole {
   UNKNOWN = 0;
   USER = 1;
   ADMIN = 2;
 }
 
 message UserInfo {
-  string name = 1 [(validate.rules).string = {min_len: 1, max_len: 50,}];
-  string email = 2 [(validate.rules).string.email = true];
-  Role role = 4 [(validate.rules).enum.defined_only = true];
+  string username = 2 [(validate.rules).string = {ignore_empty: false, min_len: 3, max_len: 50}];
+  string email = 3 [(validate.rules).string.email = true];
+  UserRole role = 4 [(validate.rules).enum = {defined_only: true}];
 }
 
 message User {
-  int64 id = 1 [(validate.rules).int64.gte = 0];
-  UserInfo info = 2 [(validate.rules).message.required = true];
-  string password = 3 [(validate.rules).string = {min_len: 5, max_len: 50}];
-  google.protobuf.Timestamp created_at = 4 [(validate.rules).timestamp.required = true];
-  google.protobuf.Timestamp updated_at = 5;
+  int64 id = 1 [(validate.rules).int64.gt = 0];
+  UserInfo info = 2;
+  google.protobuf.Timestamp created_at = 3;
+  google.protobuf.Timestamp updated_at = 4;
 }
 
 message CreateRequest {
-  UserInfo info = 1 [(validate.rules).message.required = true];
-  string password = 2 [(validate.rules).string = {min_len: 5, max_len: 50}];
+  UserInfo info = 1 [(validate.rules).message = {required: true}];
+  string password = 2 [(validate.rules).string = {min_len: 8, max_len: 50, ignore_empty: false}];
 }
 
 message CreateResponse {
-  int64 id = 1 [(validate.rules).int64.gte = 0];
+  int64 id = 1;
 }
 
 message GetRequest {
-  int64 id = 1 [(validate.rules).int64.gte = 0];
+  int64 id = 1 [(validate.rules).int64.gt = 0];
 }
 
 message GetResponse {
   User user = 1;
 }
 
-message Updwrap {
-  int64 id = 1 [(validate.rules).int64.gte = 0];
-  google.protobuf.StringValue name = 2;
-  google.protobuf.StringValue email = 3;
-  Role role = 4 [(validate.rules).enum.defined_only = true];
+message UpdateRequest {
+  int64 id = 1 [(validate.rules).int64.gt = 0];
+  UpdateInfo info = 2 [(validate.rules).message = {required: true}];
 }
 
-message UpdateRequest {
-  Updwrap wrap = 1 [(validate.rules).message.required = true];
+message UpdateInfo {
+  google.protobuf.StringValue username = 1;
+  google.protobuf.StringValue email = 2;
+  UserRole role = 3 [(validate.rules).enum = {defined_only: true}];
 }
 
 message DeleteRequest {
-  int64 id = 1 [(validate.rules).int64.gte = 0];
+  int64 id = 1 [(validate.rules).int64.gt = 0];
 }
-

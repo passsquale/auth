@@ -5,34 +5,34 @@ import (
 	"time"
 )
 
-type Role int32
+type UserRole int8
 
 const (
-	Role_UNKNOWN Role = 0
-	Role_USER    Role = 1
-	Role_ADMIN   Role = 2
+	UNKNOWN UserRole = iota
+	USER
+	ADMIN
 )
-
-type UserUpdate struct {
-	ID       int64
-	UserInfo UserInfo
-}
-
-type UserCreate struct {
-	UserInfo UserInfo
-	Password string
-}
 
 type User struct {
 	ID        int64
-	UserInfo  UserInfo
-	Password  string
+	Info      UserInfo
 	CreatedAt time.Time
 	UpdatedAt sql.NullTime
+	Password  string
 }
 
 type UserInfo struct {
-	Name  string
-	Email string
-	Role  Role
+	Username string
+	Email    string
+	Role     UserRole
+}
+
+type UserCreate struct {
+	Info     UserInfo
+	Password string
+}
+
+type UserUpdate struct {
+	ID   int64
+	Info UserInfo
 }

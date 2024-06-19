@@ -5,26 +5,35 @@ import (
 	"time"
 )
 
-type UserUpdate struct {
-	ID       int64    `db:"id"`
-	UserInfo UserInfo `db:""`
-}
+type UserRole int8
 
-type UserCreate struct {
-	UserInfo UserInfo `db:""`
-	Password string   `db:"password"`
-}
+const (
+	UNKNOWN UserRole = iota
+	USER
+	ADMIN
+)
 
 type User struct {
 	ID        int64        `db:"id"`
-	UserInfo  UserInfo     `db:""`
-	Password  string       `db:"password"`
+	Info      UserInfo     `db:""`
 	CreatedAt time.Time    `db:"created_at"`
 	UpdatedAt sql.NullTime `db:"updated_at"`
+	Password  string       `db:"password"`
 }
 
 type UserInfo struct {
-	Name  string `db:"name"`
-	Email string `db:"email"`
-	Role  int32  `db:"role"`
+	Username string   `db:"username"`
+	Name     string   `db:"name"`
+	Email    string   `db:"email"`
+	Role     UserRole `db:"role"`
+}
+
+type UserCreate struct {
+	Info     UserInfo `db:""`
+	Password string   `db:"password"`
+}
+
+type UserUpdate struct {
+	ID   int64    `db:"id"`
+	Info UserInfo `db:""`
 }

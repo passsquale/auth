@@ -13,8 +13,7 @@ func ToUserFromService(user model.User) *desc.User {
 	}
 	return &desc.User{
 		Id:        user.ID,
-		Info:      ToUserInfoFromService(user.UserInfo),
-		Password:  user.Password,
+		Info:      ToUserInfoFromService(user.Info),
 		CreatedAt: timestamppb.New(user.CreatedAt),
 		UpdatedAt: updatedAt,
 	}
@@ -22,29 +21,29 @@ func ToUserFromService(user model.User) *desc.User {
 
 func ToUserInfoFromService(user model.UserInfo) *desc.UserInfo {
 	return &desc.UserInfo{
-		Name:  user.Name,
-		Email: user.Email,
-		Role:  desc.Role(user.Role),
+		Username: user.Username,
+		Email:    user.Email,
+		Role:     desc.UserRole(user.Role),
 	}
 }
 
 func ToUserUpdateFromDesc(updateRequest *desc.UpdateRequest) *model.UserUpdate {
 	return &model.UserUpdate{
-		ID: updateRequest.Wrap.Id,
-		UserInfo: model.UserInfo{
-			Name:  updateRequest.Wrap.Name.Value,
-			Email: updateRequest.Wrap.Email.Value,
-			Role:  model.Role(*updateRequest.Wrap.Role.Enum()),
+		ID: updateRequest.Id,
+		Info: model.UserInfo{
+			Username: updateRequest.Info.Username.Value,
+			Email:    updateRequest.Info.Email.Value,
+			Role:     model.UserRole(updateRequest.Info.Role),
 		},
 	}
 }
 
 func ToUserCreateFromDesc(createRequest *desc.CreateRequest) *model.UserCreate {
 	return &model.UserCreate{
-		UserInfo: model.UserInfo{
-			Name:  createRequest.Info.Name,
-			Email: createRequest.Info.Email,
-			Role:  model.Role(createRequest.Info.Role),
+		Info: model.UserInfo{
+			Username: createRequest.Info.Username,
+			Email:    createRequest.Info.Email,
+			Role:     model.UserRole(createRequest.Info.Role),
 		},
 		Password: createRequest.Password,
 	}
