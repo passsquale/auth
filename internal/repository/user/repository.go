@@ -9,6 +9,7 @@ import (
 	"github.com/passsquale/auth/internal/repository"
 	"github.com/passsquale/auth/internal/repository/user/converter"
 	modelRepo "github.com/passsquale/auth/internal/repository/user/model"
+	"github.com/passsquale/auth/internal/utils/filter"
 	"time"
 )
 
@@ -55,13 +56,16 @@ func (r *repo) Create(ctx context.Context, userCreate *model.UserCreate) (int64,
 	return id, nil
 }
 
-func (r *repo) Get(ctx context.Context, id int64) (*model.User, error) {
+func (r *repo) Get(ctx context.Context, filters filter.Filter) (*model.User, error) {
 	builder := squirrel.Select(idColumn, nameColumn, emailColumn, roleColumn,
 		passwordColumn, createdAtColumn, updatedAtColumn).
 		PlaceholderFormat(squirrel.Dollar).
-		From(usersTable).
-		Where(squirrel.Eq{idColumn: id}).
-		Limit(1)
+		From(usersTable)
+
+	for _, condition := range filters.Conditions {
+		builder = builder.Where(squirrel.Eq{condition.Key: condition.Value})
+	}
+	builder.Limit(1)
 
 	query, args, err := builder.ToSql()
 	if err != nil {

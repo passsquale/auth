@@ -11,10 +11,6 @@ const (
 	grpcPortEnvName = "GRPC_PORT_AUTH"
 )
 
-type GRPCConfig interface {
-	Address() string
-}
-
 type grpcConfig struct {
 	host string
 	port string

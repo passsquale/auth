@@ -13,7 +13,6 @@ func GenerateToken(info model.UserInfo, secretKey []byte, duration time.Duration
 			ExpiresAt: time.Now().Add(duration).Unix(),
 		},
 		Username: info.Username,
-		Email:    info.Email,
 		Role:     info.Role,
 	}
 
